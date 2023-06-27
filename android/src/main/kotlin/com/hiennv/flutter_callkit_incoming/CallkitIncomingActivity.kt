@@ -42,7 +42,8 @@ class CallkitIncomingActivity : Activity() {
         fun getIntent(context: Context, data: Bundle) = Intent(CallkitConstants.ACTION_CALL_INCOMING).apply {
             action = "${context.packageName}.${CallkitConstants.ACTION_CALL_INCOMING}"
             putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            flags =
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }
 
         fun getIntentEnded(context: Context, isAccepted: Boolean): Intent {
@@ -263,8 +264,14 @@ class CallkitIncomingActivity : Activity() {
 
     private fun onAcceptClick() {
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
-        val acceptIntent = TransparentActivity.getIntent(this, CallkitConstants.ACTION_CALL_ACCEPT, data)
-        startActivity(acceptIntent)
+        
+        if (isTaskRoot) {
+            val acceptIntent = TransparentActivity.getIntent(this, CallkitConstants.ACTION_CALL_ACCEPT, data)
+            startActivity(acceptIntent)
+        } else {
+            val acceptIntent = CallkitIncomingBroadcastReceiver.getIntentAccept(this@CallkitIncomingActivity, data)
+            sendBroadcast(acceptIntent)
+        }
 
         dismissKeyguard()
         finish()

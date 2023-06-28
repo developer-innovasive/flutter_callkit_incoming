@@ -15,6 +15,27 @@ private fun initInstance(context: Context) {
     editor = prefs?.edit()
 }
 
+fun addLastEvent(context: Context?, action: String, data: Map<String, Any>) {
+    putString(context, "LAST_EVENT", Utils.getGsonInstance().writeValueAsString(mapOf(
+        "event" to action,
+        "body" to data,
+    )))
+}
+
+fun removeLastEvent(context: Context?) {
+    remove(context, "LAST_EVENT")
+}
+
+fun getLastEvent(context: Context?): Map<String, Any>? {
+    val json = getString(context, "LAST_EVENT", "")
+
+    return if (json != "") {
+        Utils.getGsonInstance()
+            .readValue(json, object : TypeReference<Map<String, Any>>() {})
+    } else {
+        null
+    }
+}
 
 fun addCall(context: Context?, data: Data, isAccepted: Boolean = false) {
     val json = getString(context, "ACTIVE_CALLS", "[]")

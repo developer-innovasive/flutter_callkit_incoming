@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'entities/entities.dart';
 
@@ -116,11 +117,23 @@ class FlutterCallkitIncoming {
   }
 
   static Future<CallEvent?> getLatestEvent() async {
-    final event = await _channel.invokeMethod("getLatestEvent");
-    if (event != null) {
-      return Future.value(_receiveCallEvent(event));
-    } else {
+    final last = await _channel.invokeMethod("getLatestEvent");
+
+    if (last == null) {
       return null;
     }
+
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    Event? event;
+    Map<String, dynamic> body = {};
+
+    if (last is Map) {
+      event = Event.values.firstWhere(
+          (e) => '${packageInfo.packageName}.${e.name}' == last['event']);
+      body = Map<String, dynamic>.from(last['body']);
+      return CallEvent(body, event);
+    }
+    return null;
   }
 }

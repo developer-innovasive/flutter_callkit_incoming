@@ -68,6 +68,9 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
         val callkitNotificationManager = CallkitNotificationManager(context)
         val action = intent.action ?: return
         val data = intent.extras?.getBundle(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA) ?: return
+
+        Cache.updateLatestEvent(action, data.toData())
+
         when (action) {
             "${context.packageName}.${CallkitConstants.ACTION_CALL_INCOMING}" -> {
                 try {
@@ -150,46 +153,52 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
     }
 
     private fun sendEventFlutter(event: String, data: Bundle) {
+        FlutterCallkitIncomingPlugin.sendEvent(event, data.toData())
+    }
+
+    private fun Bundle.toData(): Map<String, Any> {
         val android = mapOf(
-            "isCustomNotification" to data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_CUSTOM_NOTIFICATION, false),
-            "isCustomSmallExNotification" to data.getBoolean(
+            "isCustomNotification" to getBoolean(
+                CallkitConstants.EXTRA_CALLKIT_IS_CUSTOM_NOTIFICATION,
+                false
+            ),
+            "isCustomSmallExNotification" to getBoolean(
                 CallkitConstants.EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION,
                 false
             ),
-            "ringtonePath" to data.getString(CallkitConstants.EXTRA_CALLKIT_RINGTONE_PATH, ""),
-            "backgroundColor" to data.getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_COLOR, ""),
-            "backgroundUrl" to data.getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_URL, ""),
-            "actionColor" to data.getString(CallkitConstants.EXTRA_CALLKIT_ACTION_COLOR, ""),
-            "incomingCallNotificationChannelName" to data.getString(
+            "ringtonePath" to getString(CallkitConstants.EXTRA_CALLKIT_RINGTONE_PATH, ""),
+            "backgroundColor" to getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_COLOR, ""),
+            "backgroundUrl" to getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_URL, ""),
+            "actionColor" to getString(CallkitConstants.EXTRA_CALLKIT_ACTION_COLOR, ""),
+            "incomingCallNotificationChannelName" to getString(
                 CallkitConstants.EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME,
                 ""
             ),
-            "missedCallNotificationChannelName" to data.getString(
+            "missedCallNotificationChannelName" to getString(
                 CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME,
                 ""
             ),
         )
         val notification = mapOf(
-            "id" to data.getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID),
-            "showNotification" to data.getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SHOW),
-            "count" to data.getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_COUNT),
-            "subtitle" to data.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SUBTITLE),
-            "callbackText" to data.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_TEXT),
-            "isShowCallback" to data.getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW),
+            "id" to getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID),
+            "showNotification" to getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SHOW),
+            "count" to getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_COUNT),
+            "subtitle" to getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SUBTITLE),
+            "callbackText" to getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_TEXT),
+            "isShowCallback" to getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW),
         )
-        val forwardData = mapOf(
-            "id" to data.getString(CallkitConstants.EXTRA_CALLKIT_ID, ""),
-            "nameCaller" to data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, ""),
-            "avatar" to data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, ""),
-            "number" to data.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, ""),
-            "type" to data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, 0),
-            "duration" to data.getLong(CallkitConstants.EXTRA_CALLKIT_DURATION, 0L),
-            "textAccept" to data.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_ACCEPT, ""),
-            "textDecline" to data.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_DECLINE, ""),
-            "extra" to data.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA)!!,
+        return mapOf(
+            "id" to getString(CallkitConstants.EXTRA_CALLKIT_ID, ""),
+            "nameCaller" to getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, ""),
+            "avatar" to getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, ""),
+            "number" to getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, ""),
+            "type" to getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, 0),
+            "duration" to getLong(CallkitConstants.EXTRA_CALLKIT_DURATION, 0L),
+            "textAccept" to getString(CallkitConstants.EXTRA_CALLKIT_TEXT_ACCEPT, ""),
+            "textDecline" to getString(CallkitConstants.EXTRA_CALLKIT_TEXT_DECLINE, ""),
+            "extra" to getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA)!!,
             "missedCallNotification" to notification,
             "android" to android
         )
-        FlutterCallkitIncomingPlugin.sendEvent(event, forwardData)
     }
 }

@@ -114,4 +114,13 @@ class FlutterCallkitIncoming {
     }
     return null;
   }
+
+  static Future<CallEvent?> getLatestEvent() async {
+    final event = await _channel.invokeMethod("getLatestEvent");
+    if (event != null) {
+      return Future.value(_receiveCallEvent(event));
+    } else {
+      return null;
+    }
+  }
 }

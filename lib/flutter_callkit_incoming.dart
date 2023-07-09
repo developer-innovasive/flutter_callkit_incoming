@@ -13,10 +13,8 @@ import 'entities/entities.dart';
 /// * callConnected(dynamic)
 
 class FlutterCallkitIncoming {
-  static const MethodChannel _channel =
-      MethodChannel('flutter_callkit_incoming');
-  static const EventChannel _eventChannel =
-      EventChannel('flutter_callkit_incoming_events');
+  static const MethodChannel _channel = MethodChannel('flutter_callkit_incoming');
+  static const EventChannel _eventChannel = EventChannel('flutter_callkit_incoming_events');
 
   /// Listen to event callback from [FlutterCallkitIncoming].
   ///
@@ -102,6 +100,13 @@ class FlutterCallkitIncoming {
   /// On Android: return Empty
   static Future getDevicePushTokenVoIP() async {
     return await _channel.invokeMethod("getDevicePushTokenVoIP");
+  }
+
+  /// for check Callkit Mic is Muted.
+  /// On iOS, using Callkit(update call ui).
+  /// On Android, Nothing(only callback event listener).
+  static Future<bool> isMuted(String id) async {
+    return await _channel.invokeMethod("isMuted", {'id': id}) as bool? ?? false;
   }
 
   static CallEvent? _receiveCallEvent(dynamic data) {

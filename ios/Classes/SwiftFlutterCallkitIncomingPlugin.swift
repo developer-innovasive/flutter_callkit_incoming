@@ -400,13 +400,18 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     func configurAudioSession(){
         if data?.configureAudioSession != false {
-            let session = AVAudioSession.sharedInstance()
             do{
-                try session.setCategory(AVAudioSession.Category.playAndRecord, options: [.duckOthers,.allowBluetooth])
-                try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
-                try session.setActive(data?.audioSessionActive ?? true)
-                try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
-                try session.setPreferredIOBufferDuration(data?.audioSessionPreferredIOBufferDuration ?? 0.005)
+                let audioSession = AVAudioSession.sharedInstance()
+                    try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: .defaultToSpeaker)
+                    try audioSession.overrideOutputAudioPort(.speaker)
+                    try audioSession.setActive(true)
+    //              try AVAudioSession.sharedInstance().setCategory(.playAndRecord, options: [.defaultToSpeaker])
+    //              try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
+    //              try session.setActive(true)
+    //              try session.setActive(data?.audioSessionActive ?? true)
+    //              try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
+    //              try session.setPreferredIOBufferDuration(data?.audioSessionPreferredIOBufferDuration ?? 0.005)
+    //              try session.overrideOutputAudioPort(.speaker)
             }catch{
                 print(error)
             }

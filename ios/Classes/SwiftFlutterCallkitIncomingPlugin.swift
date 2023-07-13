@@ -135,11 +135,11 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         case "isMuted":
             guard let args = call.arguments as? [String: Any] ,
                   let callId = args["id"] as? String else{
-                    result("OK")
-                    return
-                  }
-            guard let callIdInput = UUID(uuidString: callId),
-                let call = self.callManager.callWithUUID(uuid: callIdInput) else {
+                result("OK")
+                return
+            }
+            guard let callUUID = UUID(uuidString: callId),
+                  let call = self.callManager.callWithUUID(uuid: callUUID) else {
                 result("OK")
                 return
             }
@@ -400,18 +400,13 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     func configurAudioSession(){
         if data?.configureAudioSession != false {
+            let session = AVAudioSession.sharedInstance()
             do{
-                let audioSession = AVAudioSession.sharedInstance()
-                    try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: .defaultToSpeaker)
-                    try audioSession.overrideOutputAudioPort(.speaker)
-                    try audioSession.setActive(true)
-    //              try AVAudioSession.sharedInstance().setCategory(.playAndRecord, options: [.defaultToSpeaker])
-    //              try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
-    //              try session.setActive(true)
-    //              try session.setActive(data?.audioSessionActive ?? true)
-    //              try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
-    //              try session.setPreferredIOBufferDuration(data?.audioSessionPreferredIOBufferDuration ?? 0.005)
-    //              try session.overrideOutputAudioPort(.speaker)
+                try session.setCategory(AVAudioSession.Category.playAndRecord, options: [.duckOthers,.allowBluetooth])
+                try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
+                try session.setActive(data?.audioSessionActive ?? true)
+                try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
+                try session.setPreferredIOBufferDuration(data?.audioSessionPreferredIOBufferDuration ?? 0.005)
             }catch{
                 print(error)
             }
